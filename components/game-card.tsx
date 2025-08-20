@@ -99,7 +99,7 @@ export function GameCard({
 
   return (
     <Link
-      href={`/game/${encodeURIComponent(game.name)}`}
+     href={`/game/${game.name.toLowerCase().replace(/\s+/g, "-")}`}
       onClick={handleGameClick}
     >
       <div

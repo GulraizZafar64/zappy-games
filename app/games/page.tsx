@@ -7,10 +7,11 @@ import { SearchBar } from "@/components/search-bar";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { gameData } from "@/data/games";
+import Head from "next/head";
 
 export default function AllGamesPage() {
   const [games, setGames] = useState(gameData.games);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("All Games");
   const [searchTerm, setSearchTerm] = useState("");
   const [likedGames, setLikedGames] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,12 +40,12 @@ export default function AllGamesPage() {
   useEffect(() => {
     let filtered = gameData.games;
 
-    if (selectedCategory !== "all") {
+    if (selectedCategory !== "All Games") {
       filtered = filtered.filter(
         (game) => game.category.split(" ")[0] === selectedCategory
       );
     } else {
-      filtered = gameData.games.slice(0, 30);
+      filtered = gameData.games
     }
 
     if (searchTerm) {
@@ -64,6 +65,15 @@ export default function AllGamesPage() {
   const totalPages = Math.ceil(games.length / gamesPerPage);
 
   return (
+    <>
+   <Head>
+        <title>All Free Online Games - Play Now | ZappyGames</title>
+        <meta
+          name="description"
+          content={`Browse and play ${gameData.games.length}+ free online games on ZappyGames. Discover action, puzzle, adventure, and more categories.`}
+        />
+        <link rel="canonical" href="https://zappygames.online/games" />
+      </Head>    
     <div className="min-h-screen pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
@@ -134,5 +144,7 @@ export default function AllGamesPage() {
         )}
       </div>
     </div>
+    </>
+
   );
 }

@@ -1,8 +1,18 @@
 import { ArrowLeft } from "lucide-react"
+import Head from "next/head"
 import Link from "next/link"
 
 export default function TermsPage() {
   return (
+    <>
+      <Head>
+        <title>Terms & Conditions | ZappyGames</title>
+        <meta
+          name="description"
+          content="Read the Terms & Conditions of using ZappyGames. Learn about user responsibilities, prohibited uses, account rules, and content guidelines."
+        />
+        <link rel="canonical" href="https://zappygames.online/terms" />
+      </Head>
     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link
@@ -99,5 +109,7 @@ export default function TermsPage() {
         </div>
       </div>
     </div>
+    </>
+
   )
 }

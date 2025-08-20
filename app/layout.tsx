@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://ZappyGames.app"),
+  metadataBase: new URL("https://zappygames.online"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "ZappyGames - Play Free Online Games",
     description: "Discover and play thousands of free online games across all categories",
-    url: "https://ZappyGames.app",
+    url: "https://zappygames.online",
     siteName: "ZappyGames",
     images: [
       {

@@ -1,9 +1,19 @@
 import { ArrowLeft, Users, Target, Zap, Heart } from "lucide-react"
+import Head from "next/head"
 import Link from "next/link"
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen pt-20 pb-12 px-4">
+    <>
+     <Head>
+        <title>About ZappyGames - Free Online Gaming</title>
+        <meta
+          name="description"
+          content="Learn more about ZappyGames - your ultimate destination for free browser-based online games across all genres."
+        />
+        <link rel="canonical" href="https://zappygames.online/about" />
+      </Head>
+     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link
           href="/"
@@ -80,5 +90,7 @@ export default function AboutPage() {
         </div>
       </div>
     </div>
+    </>
+   
   )
 }

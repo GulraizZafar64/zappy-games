@@ -8,6 +8,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import Head from "next/head"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -33,7 +34,16 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-12 px-4">
+    <>
+     <Head>
+        <title>Contact Us - ZappyGames</title>
+        <meta
+          name="description"
+          content="Get in touch with ZappyGames for support, partnerships, or general inquiries. We're here to help!"
+        />
+        <link rel="canonical" href="https://zappygames.online/contact" />
+      </Head>
+     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link
           href="/"
@@ -134,5 +144,7 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
+    </>
+   
   )
 }
