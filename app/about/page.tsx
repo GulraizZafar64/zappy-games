@@ -1,18 +1,18 @@
 import { ArrowLeft, Users, Target, Zap, Heart } from "lucide-react"
+import { Metadata } from "next"
 import Head from "next/head"
 import Link from "next/link"
-
+export const metadata: Metadata = {
+  title: "About ZappyGames - Free Online Gaming",
+  description:
+    "Learn more about ZappyGames - your ultimate destination for free browser-based online games across all genres.",
+  alternates: {
+    canonical: "https://zappygames.online/about",
+  },
+}
 export default function AboutPage() {
   return (
     <>
-     <Head>
-        <title>About ZappyGames - Free Online Gaming</title>
-        <meta
-          name="description"
-          content="Learn more about ZappyGames - your ultimate destination for free browser-based online games across all genres."
-        />
-        <link rel="canonical" href="https://zappygames.online/about" />
-      </Head>
      <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link

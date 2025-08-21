@@ -9,6 +9,59 @@ import { useAuthModal } from "@/hooks/use-auth-modal";
 import { supabase } from "@/lib/supabase";
 import { gameData } from "@/data/games";
 import Head from "next/head";
+import { Metadata } from "next";
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+      const gameUrl = decodeURIComponent(params.slug as string);
+    const game = gameData.games.find(
+      (g) => g.name.toLowerCase().replace(/\s+/g, "-") === gameUrl
+    );
+
+  if (!game) {
+    return {
+      title: "Game Not Found | ZappyGames",
+      description: "This game could not be found.",
+    }
+  }
+
+  const title = `${game.name} - Play Online Free | ZappyGames`
+  const description = `Play ${game.name} online for free at ZappyGames. Enjoy fun and exciting ${game.category} games without downloads.`
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `https://zappygames.online/game/${gameUrl}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://zappygames.online/game/${gameUrl}`,
+      siteName: "ZappyGames",
+      type: "website",
+      images: [
+        {
+          url: game.image || "/placeholder.png",
+          width: 1200,
+          height: 630,
+          alt: game.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [game.image || "/placeholder.png"],
+    },
+  }
+}
+
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -134,19 +187,30 @@ export default function GameDetailPage() {
 
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>{game.name} - Play Online Free | ZappyGames</title>
         <meta
           name="description"
           content={`Play ${game.name} for free on ZappyGames. Enjoy exciting ${game.category} games and discover more similar games online.`}
         />
+        <meta property="og:title" content={`${game.name} - Play Online Free`} />
+        <meta property="og:description" content={`Play ${game.name} now!`} />
+        <meta property="og:image" content={game.image || "/og-image.png"} />
+        <meta
+          property="og:url"
+          content={`https://zappygames.online/game/${encodeURIComponent(
+            game.name.toLowerCase().replace(/\s+/g, "-")
+          )}`}
+        />
+        <meta name="robots" content="index, follow" />
         <link
           rel="canonical"
           href={`https://zappygames.online/game/${encodeURIComponent(
             game.name.toLowerCase().replace(/\s+/g, "-")
           )}`}
         />
-      </Head>
+      </Head> */}
+
       <div className="min-h-screen mt-28">
         {/* Header */}
         <div className="p-4">

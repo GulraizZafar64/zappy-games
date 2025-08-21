@@ -1,38 +1,44 @@
 import { ArrowLeft } from "lucide-react"
+import { Metadata } from "next"
 import Head from "next/head"
 import Link from "next/link"
 
+
+
+export const metadata: Metadata = {
+  title: "Privacy Policy - ZappyGames",
+  description:
+    "Read the Privacy Policy of ZappyGames to understand how we collect, use, and protect your personal information while you play games online.",
+  alternates: {
+    canonical: "https://zappygames.online/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy - ZappyGames",
+    description:
+      "Learn how ZappyGames protects your privacy, handles your data, and ensures a safe gaming experience.",
+    url: "https://zappygames.online/privacy",
+    siteName: "ZappyGames",
+    type: "website",
+    images: [
+      {
+        url: "https://zappygames.online/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ZappyGames Privacy Policy",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy - ZappyGames",
+    description:
+      "Understand how ZappyGames handles and protects your data with our Privacy Policy.",
+    images: ["https://zappygames.online/og-image.jpg"],
+  },
+}
 export default function PrivacyPolicyPage() {
   return (
     <>
-      <Head>
-        <title>Privacy Policy - ZappyGames</title>
-        <meta
-          name="description"
-          content="Read the Privacy Policy of ZappyGames to understand how we collect, use, and protect your personal information while you play games online."
-        />
-        <link rel="canonical" href="https://zappygames.online/privacy" />
-
-        {/* Open Graph for social sharing */}
-        <meta property="og:title" content="Privacy Policy - ZappyGames" />
-        <meta
-          property="og:description"
-          content="Learn how ZappyGames protects your privacy, handles your data, and ensures a safe gaming experience."
-        />
-        <meta property="og:url" content="https://zappygames.online/privacy" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="ZappyGames" />
-        <meta property="og:image" content="https://zappygames.online/og-image.jpg" />
-
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Privacy Policy - ZappyGames" />
-        <meta
-          name="twitter:description"
-          content="Understand how ZappyGames handles and protects your data with our Privacy Policy."
-        />
-        <meta name="twitter:image" content="https://zappygames.online/og-image.jpg" />
-      </Head>
     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link

@@ -1,18 +1,33 @@
 import { ArrowLeft } from "lucide-react"
+import { Metadata } from "next"
 import Head from "next/head"
 import Link from "next/link"
+export const metadata: Metadata = {
+  title: "Terms & Conditions | ZappyGames",
+  description:
+    "Read the Terms & Conditions of using ZappyGames. Learn about user responsibilities, prohibited uses, account rules, and content guidelines.",
+  alternates: {
+    canonical: "https://zappygames.online/terms",
+  },
+  openGraph: {
+    title: "Terms & Conditions | ZappyGames",
+    description:
+      "Read the Terms & Conditions of using ZappyGames. Learn about user responsibilities, prohibited uses, account rules, and content guidelines.",
+    url: "https://zappygames.online/terms",
+    siteName: "ZappyGames",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms & Conditions | ZappyGames",
+    description:
+      "Read the Terms & Conditions of using ZappyGames. Learn about user responsibilities, prohibited uses, account rules, and content guidelines.",
+  },
+}
 
 export default function TermsPage() {
   return (
     <>
-      <Head>
-        <title>Terms & Conditions | ZappyGames</title>
-        <meta
-          name="description"
-          content="Read the Terms & Conditions of using ZappyGames. Learn about user responsibilities, prohibited uses, account rules, and content guidelines."
-        />
-        <link rel="canonical" href="https://zappygames.online/terms" />
-      </Head>
     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link
