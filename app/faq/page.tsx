@@ -1,5 +1,3 @@
-import { useState } from "react"
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react"
 import { Metadata } from "next"
 import FAQMainPage from "./fqa"
 export const metadata: Metadata = {
@@ -11,12 +9,6 @@ export const metadata: Metadata = {
  },
 }
 export default function FAQPage() {
-  const [openItems, setOpenItems] = useState<number[]>([])
-
-  const toggleItem = (index: number) => {
-    setOpenItems((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))
-  }
-
   return (
   <FAQMainPage/>
   

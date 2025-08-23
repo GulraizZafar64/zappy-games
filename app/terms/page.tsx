@@ -1,8 +1,17 @@
 import { ArrowLeft } from "lucide-react"
+import { Metadata } from "next"
 import Head from "next/head"
 import Link from "next/link"
-
+export const metadata: Metadata = {
+ title: "Terms & Conditions | ZappyGames",
+ description: "Read the Terms & Conditions of using ZappyGames. Learn about user responsibilities, prohibited uses, account rules, and content guidelines.",
+ metadataBase: new URL("https://zappygames.online"),
+ alternates: {
+   canonical: "/terms",
+ },
+}
 export default function TermsPage() {
+
   return (
     <>
       <Head>

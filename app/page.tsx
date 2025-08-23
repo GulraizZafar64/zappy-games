@@ -13,6 +13,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { gameData } from "@/data/games"
 import { HowToPlay } from "@/components/how-to-play"
+import Script from "next/script"
 
 export default function HomePage() {
   const [games, setGames] = useState(gameData.games.slice(0, 30)) // Limit to 30 games
@@ -66,6 +67,12 @@ export default function HomePage() {
   ]
 
   return (
+    <>
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4319048524587706"
+        crossOrigin="anonymous"
+      />
     <div className="min-h-screen">
       <HeroSection searchTerm={searchTerm} onSearchChange={setSearchTerm} />
       <StatsSection />
@@ -124,5 +131,7 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+    </>
+
   )
 }
