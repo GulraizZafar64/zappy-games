@@ -4,15 +4,6 @@ import { useState } from "react"
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react"
 import Link from "next/link"
 import Head from "next/head"
-import { Metadata } from "next"
-export const metadata: Metadata = {
-  title: "FAQ - ZappyGames",
-  description:
-    "Find answers to frequently asked questions about ZappyGames, including gameplay, accounts, devices, and support.",
-  alternates: {
-    canonical: "https://zappygames.online/faq",
-  },
-}
 
 const faqs = [
   {
@@ -66,7 +57,14 @@ export default function FAQPage() {
 
   return (
     <>
-
+    <Head>
+  <title>FAQ - ZappyGames</title>
+  <meta
+    name="description"
+    content="Find answers to frequently asked questions about ZappyGames, including gameplay, accounts, devices, and support."
+  />
+  <link rel="canonical" href="https://zappygames.online/faq" />
+</Head>
       <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <Link

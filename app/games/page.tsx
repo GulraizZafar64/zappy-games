@@ -8,15 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { gameData } from "@/data/games";
 import Head from "next/head";
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "All Free Online Games - Play Now | ZappyGames",
-  description:
-    "Browse and play 500+ free online games on ZappyGames. Discover action, puzzle, adventure, and more categories.",
-  alternates: {
-    canonical: "https://zappygames.online/games",
-  },
-};
+
 export default function AllGamesPage() {
   const [games, setGames] = useState(gameData.games);
   const [selectedCategory, setSelectedCategory] = useState("All Games");
@@ -73,7 +65,15 @@ export default function AllGamesPage() {
   const totalPages = Math.ceil(games.length / gamesPerPage);
 
   return (
-    <> 
+    <>
+   <Head>
+        <title>All Free Online Games - Play Now | ZappyGames</title>
+        <meta
+          name="description"
+          content={`Browse and play ${gameData.games.length}+ free online games on ZappyGames. Discover action, puzzle, adventure, and more categories.`}
+        />
+        <link rel="canonical" href="https://zappygames.online/games" />
+      </Head>    
     <div className="min-h-screen pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
