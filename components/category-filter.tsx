@@ -36,7 +36,7 @@ export function CategoryFilter({ categories, selectedCategory, onCategoryChange 
         return (
           <button
             key={category.name}
-            onClick={() => onCategoryChange(category.name)}
+            onClick={() => onCategoryChange(category.name.toLocaleLowerCase())}
             className={`group relative flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium transition-all duration-200 ${
               isSelected
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20 scale-[1.02]"

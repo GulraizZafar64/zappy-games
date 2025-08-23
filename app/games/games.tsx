@@ -43,7 +43,7 @@ export default function AllGamesMainPage() {
 
     if (selectedCategory !== "All Games") {
       filtered = filtered.filter(
-        (game) => game.category.split(" ")[0] === selectedCategory
+        (game) => game.category.split(" ")[0].toLocaleLowerCase() === selectedCategory
       );
     } else {
       filtered = gameData.games

@@ -47,7 +47,7 @@ export default function HomePage() {
     let filtered = gameData.games.slice(0, 30) // Always limit to 30
 
     if (selectedCategory !== "All Games") {
-      filtered = filtered.filter((game) => game.category.split(" ")[0] === selectedCategory)
+      filtered = filtered.filter((game) => game.category.split(" ")[0].toLocaleLowerCase() === selectedCategory)
     }else{
       filtered = gameData.games.slice(0, 30)
     }
