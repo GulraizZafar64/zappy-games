@@ -116,7 +116,7 @@ export const gameData = {
       "type": "category"
     },
     {
-      "name": "Running game",
+      "name": "Running Games",
       "url": "https://tinyplay.io/games/running-games",
       "type": "category"
     }
@@ -126,7 +126,7 @@ export const gameData = {
       "name": "Subway Surfers",
       "url": "https://tinyplay.io/subway-surfers",
       "type": "game",
-      "category": "Action Games",
+      "category": "Running Games",
       "source": "homepage",
       "title": "Subway Surfers",
       "description": "The hottest adventure game available is called Subway Surfers. Your goal is to avoid the cranky inspector and his dog while subway surfing. In this game of infinite running, avoid trams, trains, and other obstacles while trying to advance as far as you can.",

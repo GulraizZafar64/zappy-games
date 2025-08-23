@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { gameData } from "@/data/games";
 import Head from "next/head";
+import { Pagination } from "@/components/ui/pagination-demo";
 
 export default function AllGamesMainPage() {
   const [games, setGames] = useState(gameData.games);
@@ -65,15 +66,7 @@ export default function AllGamesMainPage() {
   const totalPages = Math.ceil(games.length / gamesPerPage);
 
   return (
-    <>
-   <Head>
-        <title>All Free Online Games - Play Now | ZappyGames</title>
-        <meta
-          name="description"
-          content={`Browse and play ${gameData.games.length}+ free online games on ZappyGames. Discover action, puzzle, adventure, and more categories.`}
-        />
-        <link rel="canonical" href="https://zappygames.online/games" />
-      </Head>    
+    <>   
     <div className="min-h-screen pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
@@ -114,21 +107,26 @@ export default function AllGamesMainPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-12 space-x-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                  currentPage === page
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-                    : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
+        //   <div className="flex justify-center mt-12 space-x-2">
+        //     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        //       <button
+        //         key={page}
+        //         onClick={() => setCurrentPage(page)}
+        //         className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+        //           currentPage === page
+        //             ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+        //             : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white"
+        //         }`}
+        //       >
+        //         {page}
+        //       </button>
+        //     ))}
+        //   </div>
+        <Pagination 
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={setCurrentPage}
+/>
         )}
 
         {games.length === 0 && (

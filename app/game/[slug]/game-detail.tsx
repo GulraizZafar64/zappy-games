@@ -225,7 +225,7 @@ export default function GameDetailPageMain() {
                 <div className="flex items-center space-x-2">
                   <Play className="h-6 w-6 text-purple-400" />
                   <h2 className="text-2xl font-bold text-white">
-                    More {game.category} Games
+                    More {game.category}
                   </h2>
                 </div>
                 <div className="text-gray-400 text-sm">
@@ -236,8 +236,8 @@ export default function GameDetailPageMain() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {suggestedGames.map((suggestedGame) => (
                   <div
-                    key={suggestedGame.url}
-                    onClick={() => handleSuggestedGameClick(suggestedGame.url)}
+                    key={suggestedGame.name}
+                    onClick={() => handleSuggestedGameClick(suggestedGame.name)}
                     className="group cursor-pointer bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                   >
                     <div className="aspect-video relative overflow-hidden">
