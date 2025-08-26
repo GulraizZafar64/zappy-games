@@ -70,7 +70,7 @@ export default function HomePage() {
     <>
       <Script
         async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4319048524587706"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6117892625157590"
         crossOrigin="anonymous"
       />
     <div className="min-h-screen">
