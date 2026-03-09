@@ -45,7 +45,7 @@ export function HowToPlay() {
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
             Get started with our gaming platform in just a few simple steps
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full mt-6" />
+          <div className="w-24 h-1 bg-zappy-green mx-auto rounded-full mt-6" />
         </div>
 
         {/* Steps Grid */}
@@ -53,10 +53,10 @@ export function HowToPlay() {
           {steps.map((step, index) => (
             <div
               key={index}
-              className="group relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-105"
+              className="group relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 hover:border-zappy-green/50 transition-all duration-300 hover:transform hover:scale-105"
             >
               {/* Step Number */}
-              <div className="absolute -top-4 -left-4 w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="absolute -top-4 -left-4 w-8 h-8 bg-zappy-green rounded-full flex items-center justify-center text-black font-bold text-sm">
                 {index + 1}
               </div>
 
@@ -72,23 +72,23 @@ export function HowToPlay() {
               <p className="text-gray-400 leading-relaxed">{step.description}</p>
 
               {/* Hover Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-zappy-green/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           ))}
         </div>
 
         {/* Call to Action */}
         {/* <div className="text-center mt-16">
-          <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-8 max-w-2xl mx-auto">
+          <div className="bg-zappy-green-dim/20 backdrop-blur-sm border border-zappy-green/30 rounded-2xl p-8 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-white mb-4 font-orbitron">Ready to Start Gaming?</h3>
             <p className="text-gray-400 mb-6">
               Join thousands of players enjoying unlimited free games right in their browser!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 font-semibold">
+              <button className="bg-zappy-green text-black px-8 py-3 rounded-full hover:bg-zappy-green-bright transition-all duration-300 transform hover:scale-105 font-semibold">
                 Browse Games
               </button>
-              <button className="border border-purple-500 text-purple-400 px-8 py-3 rounded-full hover:bg-purple-500/10 transition-all duration-300 font-semibold">
+              <button className="border border-zappy-green text-zappy-green px-8 py-3 rounded-full hover:bg-zappy-green/10 transition-all duration-300 font-semibold">
                 Sign Up Free
               </button>
             </div>

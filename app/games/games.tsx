@@ -1,148 +1,117 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { GameCard } from "@/components/game-card";
-import { CategoryFilter } from "@/components/category-filter";
-import { SearchBar } from "@/components/search-bar";
-import { useAuth } from "@/contexts/auth-context";
-import { supabase } from "@/lib/supabase";
-import { gameData } from "@/data/games";
-import Head from "next/head";
-import { Pagination } from "@/components/ui/pagination-demo";
+import { useState, useEffect } from "react"
+import { GameCard } from "@/components/game-card"
+import { CategoryFilter } from "@/components/category-filter"
+import { SearchBar } from "@/components/search-bar"
+import { Pagination } from "@/components/ui/pagination-demo"
+import { Loader2 } from "lucide-react"
+
+type Game = {
+  name: string
+  url: string
+  category: string
+  image: string
+  iframe?: string
+  rating?: number
+  plays?: number
+  badge?: string
+}
+
+function buildCategories(games: Game[]) {
+  const map = new Map<string, { name: string; url: string; type: string }>()
+  games.forEach((g) => {
+    const cat = (g.category || "other").split(" ")[0].toLowerCase()
+    if (!map.has(cat)) {
+      map.set(cat, {
+        name: cat.charAt(0).toUpperCase() + cat.slice(1),
+        url: cat,
+        type: "category",
+      })
+    }
+  })
+  return [{ name: "All Games", url: "all", type: "category" }, ...Array.from(map.values())]
+}
 
 export default function AllGamesMainPage() {
-  const [games, setGames] = useState(gameData.games);
-  const [selectedCategory, setSelectedCategory] = useState("All Games");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [likedGames, setLikedGames] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [gamesPerPage] = useState(20);
-  const { user } = useAuth();
+  const [games, setGames] = useState<Game[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState("All Games")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const gamesPerPage = 24
 
   useEffect(() => {
-    if (user) {
-      fetchLikedGames();
-    }
-  }, [user]);
+    fetch("/api/games")
+      .then((r) => r.json())
+      .then((d) => {
+        setGames(d.games || [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
 
-  const fetchLikedGames = async () => {
-    if (!user) return;
+  const isAll = selectedCategory === "All Games" || selectedCategory === "all games"
+  const filtered = games.filter((g) => {
+    if (!isAll && g.category?.split(" ")[0].toLowerCase() !== selectedCategory) return false
+    if (searchTerm && !g.name.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    return true
+  })
 
-    const { data } = await supabase
-      .from("likes")
-      .select("game_id")
-      .eq("user_id", user.id);
-
-    if (data) {
-      setLikedGames(data.map((like) => like.game_id));
-    }
-  };
-
-  useEffect(() => {
-    let filtered = gameData.games;
-
-    if (selectedCategory !== "All Games") {
-      filtered = filtered.filter(
-        (game) => game.category.split(" ")[0].toLocaleLowerCase() === selectedCategory
-      );
-    } else {
-      filtered = gameData.games
-    }
-
-    if (searchTerm) {
-      filtered = filtered.filter((game) =>
-        game.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setGames(filtered);
-    setCurrentPage(1);
-  }, [selectedCategory, searchTerm]);
-
-  // Pagination
-  const indexOfLastGame = currentPage * gamesPerPage;
-  const indexOfFirstGame = indexOfLastGame - gamesPerPage;
-  const currentGames = games.slice(indexOfFirstGame, indexOfLastGame);
-  const totalPages = Math.ceil(games.length / gamesPerPage);
+  const indexOfLastGame = currentPage * gamesPerPage
+  const indexOfFirstGame = indexOfLastGame - gamesPerPage
+  const currentGames = filtered.slice(indexOfFirstGame, indexOfLastGame)
+  const totalPages = Math.ceil(filtered.length / gamesPerPage)
+  const categories = buildCategories(games)
 
   return (
-    <>   
-    <div className="min-h-screen pt-32 pb-20">
+    <div className="min-h-screen bg-black pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 font-orbitron">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-white font-orbitron mb-2">
             All Games
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-              {" "}
-              Collection
-            </span>
+            <span className="text-zappy-green"> Collection</span>
           </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Explore our complete library of {gameData.games.length} amazing
-            games
+          <p className="text-gray-400 text-sm mb-6">
+            {games.length} games
           </p>
           <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
         </div>
 
-        {/* Filters */}
         <CategoryFilter
-          categories={gameData.categories}
+          categories={categories}
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
         />
 
-        {/* Games Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mt-12">
-          {currentGames.map((game, index) => (
-            <GameCard
-              key={game.url}
-              game={game}
-              index={index}
-              isLiked={likedGames.includes(game.url)}
-              onLikeChange={fetchLikedGames}
-            />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-        //   <div className="flex justify-center mt-12 space-x-2">
-        //     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-        //       <button
-        //         key={page}
-        //         onClick={() => setCurrentPage(page)}
-        //         className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-        //           currentPage === page
-        //             ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-        //             : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white"
-        //         }`}
-        //       >
-        //         {page}
-        //       </button>
-        //     ))}
-        //   </div>
-        <Pagination 
-  currentPage={currentPage}
-  totalPages={totalPages}
-  onPageChange={setCurrentPage}
-/>
-        )}
-
-        {games.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🎮</div>
-            <p className="text-gray-400 text-xl mb-2">
-              No games found matching your criteria.
-            </p>
-            <p className="text-gray-500">
-              Try adjusting your search or category filter.
-            </p>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-10 w-10 text-zappy-green animate-spin" />
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 mt-8">
+              {currentGames.map((game, index) => (
+                <GameCard key={game.url} game={game} index={index} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+
+            {filtered.length === 0 && !loading && (
+              <div className="text-center py-16 text-gray-400">
+                No games found. Try another category or search.
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
-    </>
-
-  );
+  )
 }

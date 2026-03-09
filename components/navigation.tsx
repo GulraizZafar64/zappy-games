@@ -30,7 +30,7 @@ export function Navigation() {
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-black/80 backdrop-blur-xl border-b border-purple-500/20 shadow-2xl shadow-purple-500/10"
+          ? "bg-black/95 backdrop-blur-xl border-b border-zappy-green/30 shadow-2xl shadow-zappy-green/10"
           : "bg-transparent"
       }`}
     >
@@ -38,14 +38,14 @@ export function Navigation() {
         <div className="flex justify-between items-center h-20">
           <Link
             href="/"
-            className="flex items-center space-x-3 text-white hover:text-purple-400 transition-all duration-300 group"
+            className="flex items-center space-x-3 text-white transition-all duration-300 group"
           >
             <div className="relative">
-              <Gamepad2 className="h-10 w-10 group-hover:scale-110 transition-transform duration-300" />
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-purple-400 animate-pulse" />
+              <Gamepad2 className="h-8 w-8 text-zappy-green group-hover:drop-shadow-[0_0_8px_rgba(169,255,77,0.8)] transition-all duration-300" />
+              <div className="absolute -top-1 -right-1 h-3 w-3 bg-zappy-green animate-ping opacity-20" />
             </div>
-            <span className="text-2xl font-bold font-orbitron bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">
-              ZappyGames
+            <span className="text-xl font-black font-orbitron tracking-tighter uppercase">
+              Zappy<span className="text-zappy-green">Games</span>
             </span>
           </Link>
 
@@ -54,10 +54,10 @@ export function Navigation() {
               <Link
                 key={item}
                 href={item === "Home" ? "/" : item === "All Games" ? "/games" : item === "Contact Us" ? "/contact" : item === "About Us" ? "/about" : `/${item.toLowerCase()}`}
-                className="relative text-white hover:text-purple-400 transition-all duration-300 group py-2"
+                className="relative text-white hover:text-zappy-green transition-all duration-300 group py-2"
               >
                 <span className="relative z-10">{item}</span>
-                <div className="absolute inset-0 bg-purple-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300" />
+                <div className="absolute inset-0 bg-zappy-green/20 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300" />
               </Link>
             ))}
 
@@ -129,19 +129,19 @@ export function Navigation() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-white hover:text-purple-400 transition-colors p-2 rounded-lg hover:bg-purple-500/20"
+            className="md:hidden text-white hover:text-zappy-green transition-colors p-2 rounded-lg hover:bg-zappy-green/20"
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
         {isOpen && (
-          <div className="md:hidden py-4 space-y-2 animate-in slide-in-from-top duration-300 bg-black/90 backdrop-blur-xl rounded-lg mt-2 border border-purple-500/20">
+          <div className="md:hidden py-4 space-y-2 animate-in slide-in-from-top duration-300 bg-black/90 backdrop-blur-xl rounded-lg mt-2 border border-zappy-green/30">
            {["Home", "All Games", "Contact Us", "About Us"].map((item) => (
               <Link
                 key={item}
                  href={item === "Home" ? "/" : item === "All Games" ? "/games" : item === "Contact Us" ? "/contact" : item === "About Us" ? "/about" : `/${item.toLowerCase()}`}
-                className="block text-white hover:text-purple-400 transition-colors py-3 px-4 rounded-lg hover:bg-purple-500/20"
+                className="block text-white hover:text-zappy-green transition-colors py-3 px-4 rounded-lg hover:bg-zappy-green/20"
                 onClick={() => setIsOpen(false)}
               >
                 {item}

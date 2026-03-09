@@ -31,7 +31,7 @@ export function CategoryFilter({ categories, selectedCategory, onCategoryChange 
     <div className="flex flex-wrap gap-3 justify-center">
       {allCategories.map((category) => {
         const Icon = categoryIcons[category.url] || Gamepad2
-        const isSelected = selectedCategory === category.name
+        const isSelected = selectedCategory === category.name || (category.name === "All Games" && selectedCategory === "all games")
 
         return (
           <button
@@ -39,22 +39,22 @@ export function CategoryFilter({ categories, selectedCategory, onCategoryChange 
             onClick={() => onCategoryChange(category.name.toLocaleLowerCase())}
             className={`group relative flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium transition-all duration-200 ${
               isSelected
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20 scale-[1.02]"
-                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10 hover:border-purple-500/50"
+                ? "bg-zappy-green text-black shadow-lg shadow-zappy-green/20 scale-[1.02]"
+                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10 hover:border-zappy-green/50"
             }`}
           >
             <Icon
               className={`h-4 w-4 transition-all duration-200 ${
                 isSelected 
-                  ? "text-white" 
-                  : "text-purple-500 group-hover:text-purple-400 group-hover:rotate-12"
+                  ? "text-black" 
+                  : "text-zappy-green group-hover:text-zappy-green-bright group-hover:rotate-12"
               }`}
             />
             <span className="text-sm font-medium">{category.name}</span>
 
             {/* Subtle hover effect */}
             {!isSelected && (
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/5 to-purple-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+              <div className="absolute inset-0 bg-gradient-to-r from-zappy-green/0 via-zappy-green/10 to-zappy-green/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
             )}
             
             {/* Active indicator */}

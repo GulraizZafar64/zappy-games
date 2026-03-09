@@ -1,372 +1,239 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Send, User, Reply, MessageCircle, AlertCircle } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import { useAuthModal } from "@/hooks/use-auth-modal"
-import { supabase } from "@/lib/supabase"
+import { User, Mail, Send, MessageSquare, ShieldAlert, Loader2 } from "lucide-react"
 
-interface Comment {
-  id: string
-  game_id: string
-  user_id: string
-  content: string
-  parent_id?: string
-  created_at: string
-  username: string
-  replies?: Comment[]
+interface CommentData {
+  _id?: string
+  name: string
+  message: string
+  createdAt?: string
+  date?: string // Fallback
 }
 
-interface CommentSectionProps {
-  gameId: string
-}
-
-export function CommentSection({ gameId }: CommentSectionProps) {
-  const [comments, setComments] = useState<Comment[]>([])
-  const [newComment, setNewComment] = useState("")
-  const [authorName, setAuthorName] = useState("")
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyContent, setReplyContent] = useState("")
+export function CommentSection({ gameUrl }: { gameUrl: string }) {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [dbError, setDbError] = useState<string | null>(null) // New state for database errors
-  const { user, isSupabaseConfigured } = useAuth()
-  const { openModal } = useAuthModal()
+  const [comments, setComments] = useState<CommentData[]>([])
 
   useEffect(() => {
     fetchComments()
-  }, [gameId, isSupabaseConfigured])
+  }, [gameUrl])
 
   const fetchComments = async () => {
     setLoading(true)
-    setDbError(null) // Clear previous errors
-
-    if (!isSupabaseConfigured) {
-      // Load mock comments for preview mode
-      setComments([
-        {
-          id: "1",
-          game_id: gameId,
-          user_id: "mock-user-1",
-          content: "This game is awesome! Great graphics and gameplay.",
-          created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-          username: "GameMaster",
-          replies: [
-            {
-              id: "1-1",
-              game_id: gameId,
-              user_id: "mock-user-2",
-              content: "I totally agree! The controls are so smooth.",
-              parent_id: "1",
-              created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-              username: "Player123",
-            },
-          ],
-        },
-        {
-          id: "2",
-          game_id: gameId,
-          user_id: "mock-user-3",
-          content: "Love the controls, very responsive!",
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-          username: "GamerPro",
-        },
-      ])
-      setLoading(false)
-      return
-    }
-
     try {
-      const { data, error } = await supabase
-        .from("comments")
-        .select("*")
-        .eq("game_id", gameId)
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        if (error.message.includes("Could not find the table")) {
-          setDbError(
-            "Comments are not available. Please ensure your Supabase database is set up and tables are created (run the SQL scripts).",
-          )
-        } else {
-          setDbError("Failed to load comments. Please try again later.")
-        }
-        throw error // Re-throw to be caught by outer catch if needed
+      const res = await fetch(`/api/comments?gameUrl=${encodeURIComponent(gameUrl)}`)
+      const data = await res.json()
+      if (data.comments) {
+        setComments(data.comments)
       }
-
-      // Organize comments with replies
-      const topLevelComments = data?.filter((comment) => !comment.parent_id) || []
-      const replies = data?.filter((comment) => comment.parent_id) || []
-
-      const commentsWithReplies = topLevelComments.map((comment) => ({
-        ...comment,
-        replies: replies.filter((reply) => reply.parent_id === comment.id),
-      }))
-
-      setComments(commentsWithReplies)
-    } catch (error) {
-      console.error("Error fetching comments:", error)
-      setComments([])
+    } catch (e) {
+      console.error("Failed to fetch comments", e)
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setDbError(null) // Clear previous errors
+    if (!name || !message || isSubmitting) return
 
-    if (!user) {
-      openModal("signin")
-      return
-    }
-
-    if (!newComment.trim() || (!user && !authorName.trim())) return
-
-    if (!isSupabaseConfigured) {
-      alert("Comments are not available in preview mode. Please set up the database.")
-      return
-    }
-
-    setSubmitting(true)
-
+    setIsSubmitting(true)
+    
     try {
-      const { error } = await supabase.from("comments").insert({
-        game_id: gameId,
-        user_id: user.id,
-        content: newComment.trim(),
-        username: user.email?.split("@")[0] || authorName || "Anonymous",
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameUrl, name, email, message })
       })
 
-      if (error) {
-        if (error.message.includes("Could not find the table")) {
-          setDbError("Failed to post comment. Please ensure your Supabase database is set up and tables are created.")
-        } else {
-          setDbError("Failed to post comment. Please try again.")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.comment) {
+          setComments([data.comment, ...comments])
+          setName("")
+          setEmail("")
+          setMessage("")
         }
-        throw error
       }
-
-      setNewComment("")
-      setAuthorName("")
-      await fetchComments()
-    } catch (error) {
-      console.error("Error posting comment:", error)
+    } catch (e) {
+      console.error("Failed to post comment", e)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setSubmitting(false)
   }
 
-  const handleReply = async (parentId: string) => {
-    setDbError(null) // Clear previous errors
-
-    if (!user) {
-      openModal("signin")
-      return
-    }
-
-    if (!replyContent.trim()) return
-
-    if (!isSupabaseConfigured) {
-      alert("Replies are not available in preview mode. Please set up the database.")
-      return
-    }
-
-    setSubmitting(true)
-
-    try {
-      const { error } = await supabase.from("comments").insert({
-        game_id: gameId,
-        user_id: user.id,
-        content: replyContent.trim(),
-        parent_id: parentId,
-        username: user.email?.split("@")[0] || "Anonymous",
-      })
-
-      if (error) {
-        if (error.message.includes("Could not find the table")) {
-          setDbError("Failed to post reply. Please ensure your Supabase database is set up and tables are created.")
-        } else {
-          setDbError("Failed to post reply. Please try again.")
-        }
-        throw error
-      }
-
-      setReplyContent("")
-      setReplyingTo(null)
-      await fetchComments()
-    } catch (error) {
-      console.error("Error posting reply:", error)
-    }
-
-    setSubmitting(false)
-  }
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const minutes = Math.floor(diff / (1000 * 60))
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (days > 0) return `${days}d ago`
-    if (hours > 0) return `${hours}h ago`
-    if (minutes > 0) return `${minutes}m ago`
-    return "Just now"
-  }
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30 animate-pulse">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="bg-gray-600 rounded-full w-8 h-8"></div>
-              <div className="bg-gray-600 h-4 w-24 rounded"></div>
-            </div>
-            <div className="bg-gray-600 h-4 w-full rounded mb-2"></div>
-            <div className="bg-gray-600 h-4 w-3/4 rounded"></div>
-          </div>
-        ))}
-      </div>
-    )
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Recently"
+    const d = new Date(dateString)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
   return (
-    <div className="space-y-6">
-      {dbError && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <div className="flex items-center space-x-2 text-red-400">
-            <AlertCircle className="h-5 w-5" />
-            <span className="text-sm font-medium">Database Error</span>
-          </div>
-          <p className="text-red-300 text-sm mt-1">{dbError}</p>
+    <div className="space-y-12">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <div className="h-10 w-2 bg-zappy-green shadow-[0_0_20px_rgba(169,255,77,0.6)]" />
+        <div>
+          <h2 className="text-3xl font-black font-orbitron uppercase tracking-tighter text-white">
+            Player <span className="text-zappy-green">Comms</span>
+          </h2>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Neural Transmission Network</p>
         </div>
-      )}
+      </div>
 
-      {/* Comment Form */}
-      <form onSubmit={handleSubmit} className="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
-        <div className="space-y-4">
-          {!user && (
-            <input
-              type="text"
-              placeholder="Your name"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
-              required
-            />
-          )}
-          <textarea
-            placeholder={user ? "Write a comment..." : "Sign in to comment or enter your name above"}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            rows={3}
-            className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-            required
-          />
-          <button
-            type="submit"
-            disabled={submitting || !newComment.trim() || (!user && !authorName.trim())}
-            className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            <Send className="h-4 w-4" />
-            <span>{submitting ? "Posting..." : "Post Comment"}</span>
-          </button>
-        </div>
-      </form>
-
-      {/* Comments List */}
-      <div className="space-y-4">
-        {comments.length === 0 && !dbError ? (
-          <div className="text-center py-12">
-            <MessageCircle className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No comments yet</p>
-            <p className="text-gray-500">Be the first to share your thoughts!</p>
-          </div>
-        ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
-              {/* Main Comment */}
-              <div className="flex items-start space-x-3 mb-3">
-                <div className="bg-purple-600 rounded-full p-2 flex-shrink-0">
-                  <User className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <p className="text-white font-medium">{comment.username}</p>
-                    <p className="text-gray-400 text-sm">{formatTime(comment.created_at)}</p>
-                  </div>
-                  <p className="text-gray-300 mb-2">{comment.content}</p>
-                  <button
-                    onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                    className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm transition-colors"
-                  >
-                    <Reply className="h-3 w-3" />
-                    <span>Reply</span>
-                  </button>
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Comment Form */}
+        <div className="space-y-6">
+          <div className="bg-[#111113] border border-white/10 p-8 relative overflow-hidden group rounded-sm shadow-xl">
+            {/* Background Accent */}
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-zappy-green/5 blur-[100px] pointer-events-none" />
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.4em] font-orbitron">
+                  Establish <span className="text-zappy-green">Uplink</span>
+                </h3>
+                <MessageSquare className="w-5 h-5 text-zappy-green opacity-40" />
               </div>
 
-              {/* Reply Form */}
-              {replyingTo === comment.id && (
-                <div className="ml-11 mt-3 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
-                  <textarea
-                    placeholder={user ? "Write a reply..." : "Sign in to reply"}
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    rows={2}
-                    className="w-full px-3 py-2 bg-gray-600/50 border border-gray-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors resize-none mb-3"
-                    disabled={!user}
-                  />
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleReply(comment.id)}
-                      disabled={submitting || !replyContent.trim() || !user}
-                      className="flex items-center space-x-1 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-1 rounded text-sm transition-colors"
-                    >
-                      <Send className="h-3 w-3" />
-                      <span>{submitting ? "Posting..." : "Reply"}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setReplyingTo(null)
-                        setReplyContent("")
-                      }}
-                      className="text-gray-400 hover:text-white px-4 py-1 text-sm transition-colors"
-                    >
-                      Cancel
-                    </button>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block ml-1">
+                      Signal Handle *
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        required
+                        placeholder="IDENTIFY YOURSELF..."
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 px-12 py-4 text-xs font-bold font-orbitron tracking-widest focus:outline-none focus:border-zappy-green focus:ring-1 focus:ring-zappy-green/50 text-white placeholder:text-gray-700 transition-all rounded-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block ml-1">
+                      Frequency (Email)
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="email"
+                        placeholder="OPTIONAL..."
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 px-12 py-4 text-xs font-bold font-orbitron tracking-widest focus:outline-none focus:border-zappy-green focus:ring-1 focus:ring-zappy-green/50 text-white placeholder:text-gray-700 transition-all rounded-sm"
+                      />
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Replies */}
-              {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-11 mt-4 space-y-3">
-                  {comment.replies.map((reply) => (
-                    <div key={reply.id} className="flex items-start space-x-3 p-3 bg-gray-700/20 rounded-lg">
-                      <div className="bg-pink-600 rounded-full p-1.5 flex-shrink-0">
-                        <User className="h-3 w-3 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <p className="text-white font-medium text-sm">{reply.username}</p>
-                          <p className="text-gray-400 text-xs">{formatTime(reply.created_at)}</p>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block ml-1">
+                    Direct Transmission *
+                  </label>
+                  <textarea
+                    required
+                    rows={5}
+                    placeholder="ENCODE MESSAGE..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 px-4 py-4 text-[13px] font-medium tracking-wide focus:outline-none focus:border-zappy-green focus:ring-1 focus:ring-zappy-green/50 text-white placeholder:text-gray-700 transition-all rounded-sm resize-none min-h-[120px]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-zappy-green hover:bg-zappy-green-bright text-black py-4 font-black text-xs uppercase tracking-[0.4em] font-orbitron flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_0_20px_rgba(169,255,77,0.2)] hover:shadow-[0_0_25px_rgba(169,255,77,0.4)]"
+                >
+                  {isSubmitting ? (
+                    "ENCRYPTING..."
+                  ) : (
+                    <>
+                      SEND SIGNAL
+                      <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+
+                <div className="bg-zappy-green/5 border border-zappy-green/10 p-3 flex items-center gap-3 rounded-sm">
+                  <ShieldAlert className="w-4 h-4 text-zappy-green shrink-0" />
+                  <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
+                    SECURED PROTOCOL // ALL DATA ENCRYPTED // FILTERED FOR SYSTEM INTEGRITY.
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Comments Feed */}
+        <div className="space-y-6 max-h-[700px] overflow-y-auto pr-4 custom-scrollbar no-scrollbar scroll-smooth">
+          {loading ? (
+             <div className="flex flex-col items-center justify-center py-32 gap-6 opacity-50 bg-[#111113]/30 border border-dashed border-white/5 rounded-sm">
+               <div className="relative">
+                 <Loader2 className="w-10 h-10 animate-spin text-zappy-green" />
+                 <div className="absolute inset-0 blur-lg bg-zappy-green/20 animate-pulse" />
+               </div>
+               <span className="text-[10px] font-black uppercase tracking-[0.8em] text-zappy-green animate-pulse">Scanning Waves...</span>
+             </div>
+          ) : (
+            <div className="space-y-4">
+              {comments.map((comment, index) => (
+                <div 
+                  key={comment._id || index}
+                  className="group bg-[#111113] border-l-4 border-white/5 hover:border-zappy-green p-6 space-y-4 transition-all hover:bg-[#141416] animate-in fade-in slide-in-from-right-4 duration-500 shadow-lg relative overflow-hidden"
+                >
+                  {/* Subtle Grid Pattern for each comment */}
+                  <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-sm bg-zappy-green/10 flex items-center justify-center border border-zappy-green/20">
+                          <User className="w-3 h-3 text-zappy-green" />
                         </div>
-                        <p className="text-gray-300 text-sm">{reply.content}</p>
+                        <span className="text-xs font-black text-white uppercase tracking-wider font-orbitron group-hover:text-zappy-green transition-colors">
+                          {comment.name}
+                        </span>
                       </div>
+                      <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+                        [{formatDate(comment.createdAt || comment.date)}]
+                      </span>
                     </div>
-                  ))}
+                    <p className="text-sm text-gray-300 leading-relaxed font-medium pt-3 pl-1 border-l border-white/10 ml-2 group-hover:border-zappy-green/30 transition-colors">
+                      {comment.message}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {comments.length === 0 && (
+                <div className="h-[400px] flex flex-col items-center justify-center text-center space-y-6 border border-white/5 bg-[#111113]/20 rounded-sm">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group animate-pulse">
+                    <MessageSquare className="w-8 h-8 text-gray-600 group-hover:text-zappy-green" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.6em] text-gray-500">Silence in the Nexus</p>
+                    <p className="text-[9px] text-gray-700 mt-2 font-bold uppercase tracking-widest">Be the first to transmit a signal.</p>
+                  </div>
                 </div>
               )}
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
 }
+

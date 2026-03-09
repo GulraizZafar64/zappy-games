@@ -51,11 +51,11 @@ export function StatsSection() {
               className="text-center group animate-in fade-in duration-1000"
               style={{ animationDelay: `${index * 200}ms` }}
             >
-              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
-                <Icon className="h-8 w-8 text-purple-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <div className="bg-gradient-to-br from-zappy-green/15 to-zappy-green-dim/10 backdrop-blur-sm rounded-2xl p-6 border border-zappy-green/20 hover:border-zappy-green/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-zappy-green/20">
+                <Icon className="h-8 w-8 text-zappy-green mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <div className="text-3xl md:text-4xl font-bold text-white mb-2 font-orbitron">
                   {value}
-                  <span className="text-purple-400">{suffix}</span>
+                  <span className="text-zappy-green">{suffix}</span>
                 </div>
                 <p className="text-gray-400 text-sm font-medium">{label}</p>
               </div>
