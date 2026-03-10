@@ -1,20 +1,11 @@
-/**
- * Monthly game scraper: fetches latest games from a source, enriches via Gemini,
- * and saves only NEW games to DB (existing games by external_id are skipped).
- *
- * Run: npx tsx scripts/scrape-and-save-games.ts
- * Or schedule: 0 0 1 * * (first day of every month)
- *
- * Requires: GEMINI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
- * Optional: SCRAPE_SOURCE_URL (URL that returns JSON array of { name, image, url?, category? })
- */
-
-import { createClient } from "@supabase/supabase-js"
+import { connectDB } from "../lib/mongodb"
+import { Game } from "../models/Game"
 import * as fs from "fs"
 import * as path from "path"
+import dotenv from "dotenv"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+dotenv.config()
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const SCRAPE_SOURCE_URL = process.env.SCRAPE_SOURCE_URL
 const GAMES_JSON_PATH = path.join(process.cwd(), "data", "games.json")
@@ -27,20 +18,6 @@ interface RawGame {
   source_url?: string
 }
 
-interface EnrichedGame {
-  name: string
-  url: string
-  category: string
-  image: string
-  description: string
-  meta_description: string
-  seo_keywords: string[]
-  ranking_keywords: string[]
-  content_enhanced: string
-  badge?: string | null
-  rank?: number | null
-}
-
 async function fetchRawGames(): Promise<RawGame[]> {
   if (SCRAPE_SOURCE_URL) {
     const res = await fetch(SCRAPE_SOURCE_URL)
@@ -48,7 +25,6 @@ async function fetchRawGames(): Promise<RawGame[]> {
     const data = await res.json()
     return Array.isArray(data) ? data : data.games || []
   }
-  // Fallback: read from local games.json and use as "source" (for demo / testing)
   const json = JSON.parse(fs.readFileSync(GAMES_JSON_PATH, "utf-8"))
   const games = json.games || []
   return games.slice(0, 5).map((g: any) => ({
@@ -60,18 +36,9 @@ async function fetchRawGames(): Promise<RawGame[]> {
   }))
 }
 
-async function enrichWithGemini(raw: RawGame): Promise<EnrichedGame> {
+async function enrichWithGemini(raw: RawGame): Promise<any> {
   const { enrichGameWithGemini } = await import("../lib/gemini")
-  return enrichGameWithGemini(
-    {
-      name: raw.name,
-      image: raw.image,
-      url: raw.url,
-      category: raw.category,
-      source_url: raw.source_url,
-    },
-    GEMINI_API_KEY!
-  )
+  return enrichGameWithGemini(raw, GEMINI_API_KEY!)
 }
 
 async function main() {
@@ -79,67 +46,55 @@ async function main() {
     console.error("Missing GEMINI_API_KEY")
     process.exit(1)
   }
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY")
-    process.exit(1)
-  }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  await connectDB()
   const rawGames = await fetchRawGames()
   console.log(`Fetched ${rawGames.length} raw games. Checking for existing in DB...`)
 
-  const existing = await supabase.from("games").select("url, external_id")
-  const existingUrls = new Set((existing.data || []).map((r) => r.url))
-  const existingExternalIds = new Set(
-    (existing.data || [])
-      .map((r) => (r as any).external_id)
-      .filter(Boolean)
-  )
+  const existingGames = await Game.find({}).select("url external_id").lean()
+  const existingUrls = new Set(existingGames.map((r: any) => r.url))
+  const existingExt = new Set(existingGames.map((r: any) => r.external_id).filter(Boolean))
 
-  const toInsert: RawGame[] = []
-  for (const g of rawGames) {
-    const slug = g.url || g.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
-    const extId = g.source_url || slug
-    if (existingUrls.has(slug) || existingExternalIds.has(extId)) continue
-    toInsert.push(g)
-  }
+  let insertedCount = 0
+  for (const raw of rawGames) {
+    const slug = raw.url || raw.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+    const extId = raw.source_url || slug
+    if (existingUrls.has(slug) || existingExt.has(extId)) continue
 
-  console.log(`Found ${toInsert.length} new games to enrich and save.`)
-
-  for (const raw of toInsert) {
     try {
       const enriched = await enrichWithGemini(raw)
-      const slug = enriched.url || raw.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
-      const row = {
+      const finalSlug = enriched.url || slug
+      
+      await Game.create({
         name: enriched.name,
-        url: slug,
+        url: finalSlug,
         category: enriched.category,
         image: enriched.image,
-        iframe: `https://example.com/games/${slug}/embed`,
+        iframe: `https://example.com/games/${finalSlug}/embed`,
         rating: 4.5,
         plays: (enriched.rank || 50) * 100,
         description: enriched.description,
         meta_description: enriched.meta_description,
         seo_keywords: enriched.seo_keywords,
-        content_enhanced: true,
-        scraped_at: new Date().toISOString(),
+        content_enhanced: enriched.content_enhanced,
+        scraped_at: new Date(),
         source_url: raw.source_url || null,
-        external_id: raw.source_url || slug,
+        external_id: raw.source_url || finalSlug,
         badge: enriched.badge || null,
-        rank: enriched.rank || null,
-      }
-      const { error } = await supabase.from("games").insert(row)
-      if (error) {
-        console.error("Insert error for", slug, error.message)
-      } else {
-        console.log("Inserted:", enriched.name)
-      }
-    } catch (e) {
-      console.error("Failed for", raw.name, e)
+        rank: enriched.rank ?? null,
+      })
+      
+      console.log("Inserted:", enriched.name)
+      insertedCount++
+      existingUrls.add(finalSlug)
+      existingExt.add(extId)
+    } catch (e: any) {
+      console.error("Failed for", raw.name, e.message)
     }
   }
 
-  console.log("Scrape and save complete.")
+  console.log(`Scrape and save complete. Total inserted: ${insertedCount}`)
+  process.exit(0)
 }
 
 main()
